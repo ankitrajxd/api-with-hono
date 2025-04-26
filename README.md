@@ -9,6 +9,7 @@ This project is a RESTful API that provides essential backend services and showc
 - Authentication with JWT
 - **Single device session management** with Redis
 - Middleware for request validation
+- **Rate limiting** for API protection
 - Webhook handling
 - Protected routes
 
@@ -38,6 +39,11 @@ This API serves as a foundation for developers building modern web applications,
 
 - Authentication middleware for protected routes
 - Request spam protection middleware with IP-based filtering
+- **Rate limiting middleware**:
+  - IP-based request tracking
+  - Configurable request limits (currently 3 requests per minute)
+  - Time-window based throttling
+  - Prevents API abuse and DDoS attacks
 
 ### Webhooks
 
