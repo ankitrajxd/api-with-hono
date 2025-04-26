@@ -28,7 +28,6 @@ export async function connectDb() {
     return redisClient;
   } catch (error) {
     console.log("Error connecting to Redis:", error);
-    Deno.exit(1);
   }
 }
 
