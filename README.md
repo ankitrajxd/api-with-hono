@@ -7,12 +7,13 @@ A modern API built with Deno and Hono.js that implements advanced functionality 
 This project is a RESTful API that provides essential backend services and showcases implementation of:
 
 - Authentication with JWT
-- **Single device session management** with Redis
+- **Single device session enforcement** with Redis
 - Middleware for request validation
 - **Rate limiting** for API protection
 - Webhook handling
 - Protected routes
 - **Google OAuth login**
+- **Request spam protection**
 - **CSRF protection middleware**
 
 This API serves as a foundation for developers building modern web applications, providing ready-to-use implementations of common backend requirements.

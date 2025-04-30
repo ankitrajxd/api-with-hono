@@ -10,7 +10,7 @@ interface User {
 const store: Record<string, User> = {};
 
 export const rateLimit = createMiddleware(async (c, next) => {
-  const info = await getConnInfo(c);
+  const info = getConnInfo(c);
 
   const limit = 3;
   const ip = info.remote.address;
@@ -18,11 +18,11 @@ export const rateLimit = createMiddleware(async (c, next) => {
   const currentTime = Date.now();
   const timeWindow = 60 * 1000; // 1 minute in milliseconds
 
-  const user = store[ip];
+  const user = store[ip as string];
 
   if (!user || currentTime - user.windowStart > timeWindow) {
     // reset if the window expires or create a new user entry
-    store[ip] = {
+    store[ip as string] = {
       count: 1,
       windowStart: currentTime,
     };

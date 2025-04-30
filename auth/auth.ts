@@ -20,7 +20,7 @@ app.post("/login", rateLimit, async (c) => {
 
 //====================================================================
 // it should be a post request (vulnerable to csrf) - but for testing purposes we are using get request
-app.post("/logout", rateLimit, authMiddlware, async (c) => {
+app.get("/logout", rateLimit, authMiddlware, async (c) => {
   // check if the user is logged in or not - if not, return a message saying already logged out
 
   const dbclient = await connectDb();
@@ -29,7 +29,9 @@ app.post("/logout", rateLimit, authMiddlware, async (c) => {
     return c.json({ message: "Already logged out" });
   }
   dbclient?.sendCommand(["DEL", "session"]);
+  dbclient?.sendCommand(["DEL", `csrf:${value}`]);
   deleteCookie(c, "session");
+  deleteCookie(c, "csrf_token");
   return c.json({ message: "Logged out" });
 });
 
@@ -119,7 +121,7 @@ async function handleSession(c: Context, username: string) {
   const csrfToken = nanoid();
   setCookie(c, "csrf_token", csrfToken, {
     httpOnly: false, // Must be accessible by JS
-    secure: true,
+    secure: false, // Set to true if using HTTPS
     sameSite: "lax",
     maxAge: 60 * 60,
   });
@@ -131,7 +133,7 @@ async function handleSession(c: Context, username: string) {
   const jwt = await createJWT(paylod);
   setCookie(c, "session", jwt, {
     httpOnly: true,
-    secure: true,
+    secure: false, // Set to true if using HTTPS // if localhost, set to false
     sameSite: "lax",
     maxAge: 60 * 60,
   });
