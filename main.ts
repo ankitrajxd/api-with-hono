@@ -7,6 +7,7 @@ import {
   csrfMiddleware,
 } from "./middlwares/auth.middlware.ts";
 import githubWebhook from "./webhooks/github-webhook.ts";
+import { rateLimit } from "./middlwares/rateLimiter.middlware.ts";
 
 const app = new Hono();
 const port = 3000;
@@ -24,7 +25,7 @@ app.route("/webhook", githubWebhook);
 app.route("/auth", login);
 
 // protected route
-app.get("/protected", authMiddlware, (c) => {
+app.get("/protected", rateLimit, authMiddlware, (c) => {
   return c.json({ message: "Protected route" });
 });
 
