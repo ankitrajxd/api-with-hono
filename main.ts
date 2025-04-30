@@ -1,12 +1,12 @@
 import { Hono } from "@hono/hono";
-import githubWebhook from "./webhooks/github-webhook.ts";
 import login from "./auth/auth.ts";
 import { connectDb } from "./db.ts";
 import {
   authMiddlware,
   checkRequestSpam,
+  csrfMiddleware,
 } from "./middlwares/auth.middlware.ts";
-import { rateLimit } from "./middlwares/rateLimiter.middlware.ts";
+import githubWebhook from "./webhooks/github-webhook.ts";
 
 const app = new Hono();
 const port = 3000;
@@ -14,7 +14,8 @@ const port = 3000;
 await connectDb();
 
 app.use(checkRequestSpam);
-app.use(rateLimit);
+app.use(csrfMiddleware);
+
 app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
@@ -26,6 +27,8 @@ app.route("/auth", login);
 app.get("/protected", authMiddlware, (c) => {
   return c.json({ message: "Protected route" });
 });
+
+//====================================================================
 
 Deno.serve(
   {

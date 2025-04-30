@@ -12,6 +12,8 @@ This project is a RESTful API that provides essential backend services and showc
 - **Rate limiting** for API protection
 - Webhook handling
 - Protected routes
+- **Google OAuth login**
+- **CSRF protection middleware**
 
 This API serves as a foundation for developers building modern web applications, providing ready-to-use implementations of common backend requirements.
 
@@ -34,20 +36,26 @@ This API serves as a foundation for developers building modern web applications,
   - New login attempts are rejected if a user is already logged in on another device
   - Option to invalidate previous sessions when logging in from a new device
   - Session verification on protected routes
+- **Google OAuth login**:
+  - `/auth/google` initiates Google OAuth
+  - `/auth/google/callback` handles the callback and session creation
 
 ### Middleware
 
 - Authentication middleware for protected routes
-- Request spam protection middleware with IP-based filtering
+- Request spam protection middleware with IP-based filtering and logging
 - **Rate limiting middleware**:
   - IP-based request tracking
   - Configurable request limits (currently 3 requests per minute)
   - Time-window based throttling
   - Prevents API abuse and DDoS attacks
+- **CSRF protection middleware**:
+  - Checks CSRF token for POST, PUT, DELETE requests
+  - CSRF tokens are stored in Redis and validated per session
 
 ### Webhooks
 
-- Endpoint for receiving and processing GitHub webhooks
+- Endpoint for receiving and processing GitHub webhooks (`/webhook`)
 - Storage and retrieval of webhook data
 
 ### API Routes
@@ -55,6 +63,8 @@ This API serves as a foundation for developers building modern web applications,
 - Public routes
 - Protected routes requiring authentication
 - Authentication endpoints
+- Google OAuth endpoints
+- Webhook endpoints
 
 ## Single Device Session Implementation
 
@@ -83,6 +93,10 @@ Create a `.env` file with the following variables:
 REDIS_HOST='your-redis-host'
 REDIS_USERNAME='your-redis-username'
 REDIS_PASSWORD='your-redis-password'
+
+# Google OAuth
+GOOGLE_CLIENT_ID='your-google-client-id'
+GOOGLE_CLIENT_SECRET='your-google-client-secret'
 ```
 
 ### Running the Application
@@ -99,7 +113,9 @@ The server will start on port 3000.
 - `GET /`: Hello world endpoint
 - `POST /auth/login`: Authenticate and get a session cookie
 - `POST /auth/logout`: End the current session
-- `GET /protected`: Example of a protected route
+- `GET /auth/google`: Start Google OAuth login
+- `GET /auth/google/callback`: Google OAuth callback
+- `GET /protected`: Example of a protected route (requires authentication)
 - `POST /webhook`: Endpoint for receiving GitHub webhooks
 - `GET /webhook`: Retrieve the most recent webhook data
 
@@ -108,3 +124,5 @@ The server will start on port 3000.
 - JWT secret should be stored as an environment variable in production
 - The single device session implementation prevents concurrent logins across multiple devices
 - IP-based request filtering is available but commented out in the code
+- CSRF protection is enabled for state-changing requests (POST, PUT, DELETE)
+- Session and CSRF tokens are stored in Redis for secure validation

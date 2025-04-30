@@ -12,7 +12,7 @@ export const authMiddlware = createMiddleware(async (c, next) => {
   }
 
   const dbclient = await connectDb();
-  const storedSession = await dbclient.sendCommand(["GET", "session"]);
+  const storedSession = await dbclient?.sendCommand(["GET", "session"]);
   if (!storedSession) {
     return c.json({ message: "Unauthorized" }, 401);
   }
@@ -30,7 +30,7 @@ export const authMiddlware = createMiddleware(async (c, next) => {
 });
 
 export const checkRequestSpam = createMiddleware(async (c, next) => {
-  const info = await getConnInfo(c);
+  const info = getConnInfo(c);
 
   const ip = info.remote.address;
   console.log(`IP: ${ip}`);
@@ -43,5 +43,24 @@ export const checkRequestSpam = createMiddleware(async (c, next) => {
   //     403
   //   );
   // }
+  await next();
+});
+
+export const csrfMiddleware = createMiddleware(async (c, next) => {
+  if (["POST", "PUT", "DELETE"].includes(c.req.method)) {
+    const csrfToken =
+      c.req.header("x-csrf-token") ||
+      c.req.header("csrf-token") ||
+      c.req.query("csrf_token");
+    const session = getCookie(c, "session");
+    if (!csrfToken || !session) {
+      return c.json({ message: "Missing CSRF token or session" }, 403);
+    }
+    const dbclient = await connectDb();
+    const storedToken = await dbclient?.sendCommand(["GET", `csrf:${session}`]);
+    if (!storedToken || storedToken !== csrfToken) {
+      return c.json({ message: "Invalid CSRF token" }, 403);
+    }
+  }
   await next();
 });
